@@ -1,0 +1,347 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>J.A.R.V.I.S UI</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary: #00f3ff;
+            --primary-dark: #008b99;
+            --bg-base: #02040a;
+            --text-light: #e0faff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Rajdhani', sans-serif;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            background-image: radial-gradient(circle at center, #0a1526 0%, var(--bg-base) 100%);
+            color: var(--text-light);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 25px 30px;
+            z-index: 10;
+        }
+
+        .sys-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--primary);
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px rgba(0, 243, 255, 0.4);
+        }
+
+        .settings-btn {
+            background: transparent;
+            border: none;
+            color: var(--primary);
+            font-size: 22px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .settings-btn:active { transform: rotate(90deg) scale(0.9); }
+
+        .main-display {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            z-index: 5;
+        }
+
+        .jarvis-core {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+
+        .core-btn {
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, rgba(0,243,255,0.2) 0%, rgba(0,0,0,0) 80%);
+            border: 2px solid var(--primary);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 30px;
+            color: var(--primary);
+            z-index: 10;
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .jarvis-core:active .core-btn { transform: scale(0.9); }
+
+        .ring {
+            position: absolute;
+            border-radius: 50%;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+
+        .ring-1 { width: 120px; height: 120px; border: 1px dashed var(--primary); opacity: 0.5; }
+        .ring-2 { width: 150px; height: 150px; border: 1px solid rgba(0, 243, 255, 0.2); border-left: 2px solid var(--primary); border-right: 2px solid var(--primary); }
+        .ring-3 { width: 180px; height: 180px; border: 1px solid rgba(0, 243, 255, 0.1); border-top: 2px solid var(--primary-dark); border-bottom: 2px solid var(--primary-dark); }
+
+        /* Animations */
+        .state-idle .core-btn { animation: breathe 4s infinite ease-in-out; }
+        .state-idle .ring-2 { animation: spin 15s linear infinite; }
+        .state-idle .ring-3 { animation: spin-reverse 20s linear infinite; }
+
+        .state-listening .core-btn { background: rgba(0,243,255,0.3); box-shadow: 0 0 40px rgba(0, 243, 255, 0.6); color: #fff; }
+        .state-listening .ring-1 { animation: ripple 1.5s infinite linear; }
+        .state-listening .ring-2 { animation: spin 4s linear infinite; }
+
+        .state-processing .core-btn { color: var(--primary-dark); border-color: var(--primary-dark); }
+        .state-processing .ring-1 { animation: spin 1s linear infinite; border: 2px dashed var(--primary); opacity: 0.8; }
+        .state-processing .ring-2 { animation: spin-reverse 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite; }
+
+        .state-speaking .core-btn { animation: soundwave 0.3s infinite alternate ease-in-out; }
+        .state-speaking .ring-2 { animation: spin 8s linear infinite, throb 0.4s infinite alternate; }
+
+        @keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        @keyframes spin { 100% { transform: translate(-50%, -50%) rotate(360deg); } }
+        @keyframes spin-reverse { 100% { transform: translate(-50%, -50%) rotate(-360deg); } }
+        @keyframes ripple { 0% { width: 80px; height: 80px; opacity: 1; } 100% { width: 250px; height: 250px; opacity: 0; } }
+        @keyframes soundwave { 0% { transform: scale(0.95); } 100% { transform: scale(1.15); } }
+        @keyframes throb { 0% { border-color: var(--primary); } 100% { border-color: #fff; } }
+
+        .status-text { margin-top: 50px; font-size: 14px; letter-spacing: 3px; color: var(--primary-dark); font-weight: 600; }
+
+        .subtitle-container { position: absolute; bottom: 50px; left: 20px; right: 20px; min-height: 80px; display: flex; align-items: center; justify-content: center; text-align: center; }
+        .subtitle { font-size: 18px; font-weight: 500; letter-spacing: 1px; color: var(--text-light); transition: opacity 0.3s; }
+        .subtitle span { color: var(--primary); font-weight: 700; margin-right: 5px; }
+
+        /* Modal */
+        .modal-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(2, 4, 10, 0.85); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.4s; }
+        .modal-overlay.active { opacity: 1; pointer-events: all; }
+        .modal-content { background: rgba(10, 15, 26, 0.9); border: 1px solid var(--primary); border-radius: 15px; padding: 30px 25px; width: 85%; max-width: 380px; text-align: center; }
+        .modal-content h2 { color: #fff; margin-bottom: 10px; }
+        .modal-content p { font-size: 14px; color: #9ab; margin-bottom: 25px; }
+        .modal-content input { width: 100%; padding: 15px; background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(0, 243, 255, 0.4); color: #fff; border-radius: 8px; margin-bottom: 20px; }
+        .modal-content button { width: 100%; padding: 14px; background: var(--primary); border: none; font-weight: 700; border-radius: 8px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div id="api-modal" class="modal-overlay">
+        <div class="modal-content">
+            <i class="fa-solid fa-microchip" style="font-size:40px; color:var(--primary); margin-bottom:15px;"></i>
+            <h2>SYSTEM AUTH</h2>
+            <p>Paste your OpenRouter API Key to connect to the AI mainframe.</p>
+            <input type="password" id="api-key-input" placeholder="sk-or-v1-...">
+            <button id="save-key-btn">INITIALIZE UPLINK</button>
+        </div>
+    </div>
+
+    <header>
+        <div class="sys-title"><i class="fa-solid fa-fingerprint"></i> J.A.R.V.I.S</div>
+        <button class="settings-btn" id="settings-btn"><i class="fa-solid fa-sliders"></i></button>
+    </header>
+
+    <div class="main-display">
+        <div class="jarvis-core state-idle" id="jarvis-core">
+            <div class="ring ring-1"></div><div class="ring ring-2"></div><div class="ring ring-3"></div>
+            <div class="core-btn"><i class="fa-solid fa-microphone-lines" id="core-icon"></i></div>
+        </div>
+        <div class="status-text" id="status-text">SYSTEM STANDBY</div>
+    </div>
+
+    <div class="subtitle-container"><div class="subtitle" id="subtitle"></div></div>
+
+    <script>
+        // Use OpenRouter's auto-router to ALWAYS pick an online, free model
+        const AI_MODEL = "openrouter/free"; 
+        let OPENROUTER_API_KEY = localStorage.getItem('jarvis_api_key') || "";
+        
+        let conversationHistory =[{
+            role: "system", 
+            content: "You are J.A.R.V.I.S, an advanced AI. Address the user as 'Sir'. Keep responses very brief (1-3 sentences) so they can be spoken via TTS. No emojis or markdown."
+        }];
+
+        const apiModal = document.getElementById('api-modal'), apiKeyInput = document.getElementById('api-key-input'), saveKeyBtn = document.getElementById('save-key-btn'), settingsBtn = document.getElementById('settings-btn');
+        const jarvisCore = document.getElementById('jarvis-core'), coreIcon = document.getElementById('core-icon'), statusText = document.getElementById('status-text'), subtitle = document.getElementById('subtitle');
+
+        function setUIState(state, statusMessage = "") {
+            jarvisCore.className = `jarvis-core state-${state}`;
+            if (statusMessage) statusText.textContent = statusMessage;
+            
+            const icons = { 'offline': 'fa-power-off', 'listening': 'fa-ear-listen', 'processing': 'fa-satellite-dish', 'speaking': 'fa-wave-square', 'idle': 'fa-microphone-lines' };
+            coreIcon.className = `fa-solid ${icons[state] || 'fa-microphone-lines'}`;
+        }
+
+        function updateSubtitle(text, sender) {
+            subtitle.style.opacity = 0;
+            setTimeout(() => {
+                subtitle.innerHTML = sender === 'system' ? text : `<span>${sender.toUpperCase()}:</span> ${text}`;
+                subtitle.style.opacity = 1;
+            }, 300);
+        }
+
+        function checkSystemAuth(triggerGreeting = false) {
+            if (!OPENROUTER_API_KEY) {
+                apiModal.classList.add('active'); setUIState('offline', 'AUTH REQUIRED');
+            } else {
+                apiModal.classList.remove('active'); setUIState('idle', 'SYSTEM STANDBY');
+                if (triggerGreeting) {
+                    const msg = "Uplink established. Systems online.";
+                    updateSubtitle(msg, 'jarvis'); speakText(msg);
+                } else updateSubtitle("Tap the core to engage audio uplink.", "system");
+            }
+        }
+
+        saveKeyBtn.addEventListener('click', () => {
+            if (apiKeyInput.value.trim() !== "") {
+                OPENROUTER_API_KEY = apiKeyInput.value.trim();
+                localStorage.setItem('jarvis_api_key', OPENROUTER_API_KEY);
+                checkSystemAuth(true);
+            }
+        });
+
+        settingsBtn.addEventListener('click', () => {
+            apiKeyInput.value = OPENROUTER_API_KEY; apiModal.classList.add('active');
+        });
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition = SpeechRecognition ? new SpeechRecognition() : null;
+        let isListening = false;
+
+        if (recognition) {
+            recognition.continuous = false; recognition.interimResults = false; recognition.lang = 'en-US';
+            
+            recognition.onstart = () => {
+                isListening = true; window.speechSynthesis.cancel();
+                setUIState('listening', 'AWAITING AUDIO INPUT...');
+                updateSubtitle("...", "user");
+            };
+            
+            recognition.onend = () => { isListening = false; };
+            
+            recognition.onresult = async (event) => {
+                const transcript = event.results[0][0].transcript;
+                updateSubtitle(transcript, 'user');
+                setUIState('processing', 'ACCESSING MAINFRAME...');
+                
+                const responseText = await getJarvisResponse(transcript);
+                updateSubtitle(responseText, 'jarvis'); speakText(responseText);
+            };
+
+            recognition.onerror = () => { setUIState('idle', 'SYSTEM STANDBY'); updateSubtitle("Audio lost. Tap core to retry.", "system"); };
+        }
+
+        jarvisCore.addEventListener('click', () => {
+            if (!OPENROUTER_API_KEY) { apiModal.classList.add('active'); return; }
+            if (isListening) recognition.stop(); else if (recognition) recognition.start();
+        });
+
+        // --- UPDATED API FETCH REQUEST ---
+        async function getJarvisResponse(userInput) {
+            conversationHistory.push({ role: "user", content: userInput });
+
+            try {
+                const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+                        "Content-Type": "application/json",
+                        "HTTP-Referer": "https://jarvis-hud.local", // Fixed CORS restriction
+                        "X-Title": "Jarvis HUD"
+                    },
+                    body: JSON.stringify({
+                        model: AI_MODEL,
+                        messages: conversationHistory
+                    })
+                });
+
+                if (!response.ok) {
+                    // This will tell you EXACTLY what is failing 
+                    const errorData = await response.json();
+                    throw new Error(errorData.error?.message || `HTTP Error ${response.status}`);
+                }
+
+                const data = await response.json();
+                const reply = data.choices[0].message.content;
+                conversationHistory.push({ role: "assistant", content: reply });
+                
+                if (conversationHistory.length > 7) conversationHistory = [conversationHistory[0], ...conversationHistory.slice(-6)];
+                return reply;
+
+            } catch (error) {
+                console.error("API Error:", error);
+                
+                // If the key is invalid
+                if(error.message.includes("401") || error.message.includes("403")) {
+                     localStorage.removeItem('jarvis_api_key'); OPENROUTER_API_KEY = "";
+                     setTimeout(() => checkSystemAuth(false), 3000);
+                     return "Sir, your API key is invalid or unauthorized. Please update it in the settings.";
+                }
+                
+                // Returns the EXACT error visually
+                return `Connection Error: ${error.message}. Please check your internet connection.`;
+            }
+        }
+
+        let availableVoices =[];
+        window.speechSynthesis.onvoiceschanged = () => availableVoices = window.speechSynthesis.getVoices();
+
+        function speakText(text) {
+            const synth = window.speechSynthesis;
+            const utterance = new SpeechSynthesisUtterance(text.replace(/[\u{1F600}-\u{1F6FF}]/gu, '').replace(/[*`_]/g, ''));
+            
+            if (availableVoices.length === 0) availableVoices = synth.getVoices();
+            const maleVoice = availableVoices.find(v => ['male','david','mark','george'].some(name => v.name.toLowerCase().includes(name)));
+            
+            if (maleVoice) utterance.voice = maleVoice;
+            else {
+                const enVoice = availableVoices.find(v => v.lang.startsWith('en-'));
+                if(enVoice) utterance.voice = enVoice;
+            }
+
+            utterance.pitch = 0.8; utterance.rate = 1.05;
+            utterance.onstart = () => setUIState('speaking', 'AUDIO OUTPUT ACTIVE');
+            utterance.onend = () => {
+                setUIState('idle', 'SYSTEM STANDBY');
+                setTimeout(() => { if (jarvisCore.classList.contains('state-idle')) updateSubtitle("Tap the core to engage audio uplink.", "system"); }, 5000);
+            };
+            synth.speak(utterance);
+        }
+
+        checkSystemAuth(false);
+    </script>
+</body>
+</html>
